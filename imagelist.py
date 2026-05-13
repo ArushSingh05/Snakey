@@ -24,7 +24,7 @@ if __name__ == "__main__":
     TEST_Y = 50
     TEST_W = 64
     TEST_H = 64
-    TEST_FILES = "code\\images\\test\\test"
+    TEST_FILES = "images\\test\\test"
 
     image_obj = ImageList(TEST_FILES,TEST_W,TEST_H)
 
