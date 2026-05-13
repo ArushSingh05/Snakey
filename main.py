@@ -28,7 +28,7 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
     button_rects = []
     button_width = 280
     button_height = 58
-    start_y = 200
+    start_y = 210
 
     for index, button in enumerate(buttons):
         rect = pygame.Rect(
