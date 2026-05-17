@@ -2,7 +2,7 @@ import pygame
 import time
 from imagelist import ImageList
 
-SCREEN_WIDTH = 650
+SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 
 

@@ -2,7 +2,7 @@ import pygame
 
 from settings import show_settings
 
-SCREEN_WIDTH = 801
+SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BUTTON_COLOR = (36, 48, 88)
 BUTTON_HOVER = (68, 98, 170)
