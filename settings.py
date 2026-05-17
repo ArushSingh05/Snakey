@@ -2,7 +2,7 @@ import pygame
 
 DEFAULT_SETTINGS = {
     "turn_sensitivity": 0.08,
-    "acceleration_rate": 0.08
+    "acceleration_rate": 0.09
 }
 
 

@@ -20,7 +20,7 @@ class ImageList():
 if __name__ == "__main__":
     SCR_X = 640
     SCR_Y = 480
-    TEST_X = 50
+    TEST_X = 51
     TEST_Y = 50
     TEST_W = 64
     TEST_H = 64
