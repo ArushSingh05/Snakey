@@ -1,5 +1,6 @@
 import pygame
 
+from customisation import show_customization
 from settings import show_settings
 
 SCREEN_WIDTH = 800
@@ -83,15 +84,15 @@ def main():
     # The main game loop: keep switching between screens until quit.
     while state != "quit":
         if state == "menu":
-            pass
+            state = run_main_menu(screen, clock, font, title_font)
         elif state == "play":
             pass
         elif state == "profile":
             pass
         elif state == "customization":
-            pass
+            state = show_customization(screen, clock, font, title_font)
         elif state == "settings":
-            pass
+            state = show_settings(screen, clock, font, title_font)
         else:
             state = "menu"
 
