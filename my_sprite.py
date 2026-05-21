@@ -2,12 +2,19 @@ import pygame
 import time
 from imagelist import ImageList
 
+# Screen dimensions
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 
 
+# MySprite class
 class MySprite(pygame.sprite.Sprite):
+    
     def __init__(self, x, y, w, h, images, screen):
+        """
+        Base sprite class that handles position, movement, animation, and rendering.
+        Inherits from pygame.sprite.Sprite to leverage Pygame's sprite functionality.
+        """
         super().__init__()
         if x < 0 or x > SCREEN_WIDTH or y < 0 or y > SCREEN_HEIGHT:
             raise ValueError("Sprite position is out of range")

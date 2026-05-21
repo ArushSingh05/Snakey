@@ -1,5 +1,6 @@
 import pygame
 
+from player_profile import load_player_profile_data, save_profile_data, show_profile
 from customisation import show_customization
 from settings import show_settings
 
@@ -12,14 +13,14 @@ BACKGROUND_COLOR = (12, 18, 42)
 
 
 def draw_button(screen, font, rect, label, hover=False):
-    """Draw a rounded rectangular button with centered text."""
+    # Draw a rounded rectangular button with centered text.
     pygame.draw.rect(screen, BUTTON_HOVER if hover else BUTTON_COLOR, rect, border_radius=12)
     text_surface = font.render(label, True, BUTTON_TEXT)
     screen.blit(text_surface, text_surface.get_rect(center=rect.center))
 
 
 def run_main_menu(screen, clock, font, title_font, profile_data):
-    """Display the main menu and return the selected next state."""
+    # Display the main menu and return the selected next state.
     buttons = [
         {"label": "Play", "action": "play"},
         {"label": "Profile", "action": "profile"},
@@ -70,7 +71,7 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
         pygame.display.flip()
         clock.tick(60)
 
-
+# The main program
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -80,24 +81,32 @@ def main():
     font = pygame.font.SysFont(None, 32)
     title_font = pygame.font.SysFont(None, 72)
 
+    profile_data = {}
+
 
     # The main game loop: keep switching between screens until quit.
+    state = "menu"
     while state != "quit":
         if state == "menu":
-            state = run_main_menu(screen, clock, font, title_font)
+            state = run_main_menu(screen, clock, font, title_font, profile_data)
         elif state == "play":
             pass
         elif state == "profile":
-            pass
+            state = show_profile(screen, clock, font, title_font, profile_data)
+            save_profile_data(profile_data)
         elif state == "customization":
-            state = show_customization(screen, clock, font, title_font)
+            state = show_customization(screen, clock, font, title_font, profile_data)
+            save_profile_data(profile_data)
         elif state == "settings":
-            state = show_settings(screen, clock, font, title_font)
+            state = show_settings(screen, clock, font, title_font, profile_data)
+            save_profile_data(profile_data)
         else:
             state = "menu"
 
+    save_profile_data(profile_data)
     pygame.quit()
 
 
+# Initialise program
 if __name__ == "__main__":
     main()

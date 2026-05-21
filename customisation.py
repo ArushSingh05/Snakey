@@ -13,7 +13,7 @@ ARENA_OPTIONS = [
 
 
 def ensure_customization(data):
-    """Make sure the profile has customizable skin and arena indices."""
+    # Make sure the profile has customizable skin and arena indices
     custom = data.get("customization", {})
     custom.setdefault("skin_index", 0)
     custom.setdefault("arena_index", 0)
@@ -22,7 +22,7 @@ def ensure_customization(data):
 
 
 def paint_arena(screen, custom):
-    """Fill the screen with the currently selected arena color."""
+    # Fill the screen with the currently selected arena color
     arena = ARENA_OPTIONS[custom.get("arena_index", 0) % len(ARENA_OPTIONS)]
     screen.fill(arena["color"])
 
