@@ -1,7 +1,8 @@
 import pygame
 
 from player_profile import load_player_profile_data, save_profile_data, show_profile
-from customisation import show_customization
+from play import show_play_menu
+from customisation import show_customisation
 from settings import show_settings
 
 SCREEN_WIDTH = 800
@@ -24,7 +25,7 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
     buttons = [
         {"label": "Play", "action": "play"},
         {"label": "Profile", "action": "profile"},
-        {"label": "Customisation", "action": "customization"},
+        {"label": "Customisation", "action": "customisation"},
         {"label": "Settings", "action": "settings"},
     ]
     button_rects = []
@@ -90,12 +91,12 @@ def main():
         if state == "menu":
             state = run_main_menu(screen, clock, font, title_font, profile_data)
         elif state == "play":
-            pass
+            state = show_play_menu(screen, clock, font, title_font, profile_data)
         elif state == "profile":
             state = show_profile(screen, clock, font, title_font, profile_data)
             save_profile_data(profile_data)
         elif state == "customization":
-            state = show_customization(screen, clock, font, title_font, profile_data)
+            state = show_customisation(screen, clock, font, title_font, profile_data)
             save_profile_data(profile_data)
         elif state == "settings":
             state = show_settings(screen, clock, font, title_font, profile_data)
