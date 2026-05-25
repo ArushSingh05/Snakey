@@ -5,35 +5,55 @@ SKIN_OPTIONS = [
     {"label": "Violet", "body": (156, 79, 198), "head": (244, 194, 255)},
     {"label": "Sunset", "body": (240, 138, 83), "head": (255, 218, 148)},
 ]
-ARENA_OPTIONS = [
-    {"label": "Night", "color": (10, 14, 30)},
-    {"label": "Ocean", "color": (14, 45, 88)},
-    {"label": "Sand", "color": (105, 95, 70)},
+ARENA_IMAGE_PATHS = [
+    {"label": "Ocean", "file": "arena0.png"},
+    {"label": "Sunset", "file": "arena1.png"},
+    {"label": "Peak", "file": "arena2.png"},
 ]
 
 
+def load_arena_images():
+    """Loads arena images and returns them as options like before."""
+    arenas = []
+    for arena in ARENA_IMAGE_PATHS:
+        try:
+            # Load and convert for best display performance
+            img = pygame.image.load(arena["file"]).convert()
+            arenas.append({"label": arena["label"], "image": img})
+        except Exception as e:
+            # Fallback to a plain color if image can't load (optional)
+            print(f"Error loading {arena['file']}: {e}")
+            arenas.append({"label": arena["label"], "image": None})
+    return arenas
+
+# ARENA_OPTIONS is now built at runtime after loading images
+ARENA_OPTIONS = [] # Will be loaded with images later
+
 def ensure_customization(data):
-    # Make sure the profile has customizable skin and arena indices
     custom = data.get("customization", {})
     custom.setdefault("skin_index", 0)
     custom.setdefault("arena_index", 0)
     data["customization"] = custom
     return custom
 
-
 def paint_arena(screen, custom):
-    # Fill the screen with the currently selected arena color
+    # Fill the screen with the currently selected arena image (scaled to screen)
     arena = ARENA_OPTIONS[custom.get("arena_index", 0) % len(ARENA_OPTIONS)]
-    screen.fill(arena["color"])
+    image = arena["image"]
+    if image:
+        # Optionally scale the arena image to screen size
+        image = pygame.transform.scale(image, screen.get_size())
+        screen.blit(image, (0, 0))
+    else:
+        # If the image failed to load, fall back to a background color
+        screen.fill((30, 30, 30))
 
-
-def show_customization(screen, clock, font, big_font, profile_data):
+def show_customisation(screen, clock, font, big_font, profile_data):
     custom = ensure_customization(profile_data)
     selected = 0
     options = ["skin_index", "arena_index"]
 
     while True:
-        # Event loop for the customization screen.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
@@ -68,7 +88,7 @@ def show_customization(screen, clock, font, big_font, profile_data):
                 label = f"Arena: {ARENA_OPTIONS[custom['arena_index']]['label']}"
             color = (255, 255, 255) if idx == selected else (190, 190, 190)
             screen.blit(font.render(label, True, color), (130, 200 + idx * 60))
-
+        
         skin = SKIN_OPTIONS[custom["skin_index"]]
         pygame.draw.circle(screen, skin["body"], (600, 260), 40)
         pygame.draw.circle(screen, skin["head"], (600, 230), 18)
