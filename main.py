@@ -94,7 +94,7 @@ def main():
         elif state == "profile":
             state = show_profile(screen, clock, font, title_font, profile_data)
             save_profile_data(profile_data)
-        elif state == "customization":
+        elif state == "customisation":
             state = show_customisation(screen, clock, font, title_font, profile_data)
             save_profile_data(profile_data)
         elif state == "settings":
