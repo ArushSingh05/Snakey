@@ -1,5 +1,6 @@
 import json
 import os
+import pygame
 
 PROFILE_FILE = "profile_data.json"
 DEFAULT_PROFILE = {
@@ -46,8 +47,6 @@ def save_profile_data(profile_data):
 
 def show_profile(screen, clock, font, big_font, profile_data):
     """Show the profile screen with saved stats and return to menu on request."""
-    import pygame
-
     back_rect = pygame.Rect(40, 520, 120, 40)
     while True:
         # Event loop for the profile screen.
@@ -89,3 +88,4 @@ def show_profile(screen, clock, font, big_font, profile_data):
 
         pygame.display.flip()
         clock.tick(60)
+

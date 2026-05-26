@@ -84,7 +84,6 @@ def main():
 
     profile_data = {}
 
-
     # The main game loop: keep switching between screens until quit.
     state = "menu"
     while state != "quit":
