@@ -128,10 +128,25 @@ class Snake:
 
 
 def paint_arena(screen, profile_data):
-    """Paint the playing arena using the selected customization color."""
+    """Paint the playing arena using the selected customization image or fallback color."""
+    if not ARENA_OPTIONS:
+        # Fallback if images weren't loaded
+        screen.fill((30, 30, 30))
+        return
+    
     custom = profile_data.get("customization", {})
     arena_index = custom.get("arena_index", 0) % len(ARENA_OPTIONS)
-    screen.fill(ARENA_OPTIONS[arena_index]["color"])
+    arena = ARENA_OPTIONS[arena_index]
+    image = arena.get("image")
+    
+    if image:
+        # Scale and display the arena image
+        scaled_image = pygame.transform.scale(image, screen.get_size())
+        screen.blit(scaled_image, (0, 0))
+    else:
+        # Fallback to solid color if image failed to load
+        color = arena.get("color", (30, 30, 30))
+        screen.fill(color)
 
 
 def run_match(screen, clock, font, big_font, profile_data, mode):
