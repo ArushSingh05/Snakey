@@ -1,33 +1,38 @@
 import pygame
+import os
 
 SKIN_OPTIONS = [
     {"label": "Emerald", "body": (66, 184, 118), "head": (230, 255, 190)},
     {"label": "Violet", "body": (156, 79, 198), "head": (244, 194, 255)},
     {"label": "Sunset", "body": (240, 138, 83), "head": (255, 218, 148)},
 ]
+
 ARENA_IMAGE_PATHS = [
-    {"label": "Ocean", "file": "arena0.png"},
-    {"label": "Sunset", "file": "arena1.png"},
-    {"label": "Peak", "file": "arena2.png"},
+    {"label": "Ocean", "file": "images/arena/arena0.png"},
+    {"label": "Sunset", "file": "images/arena/arena1.png"},
+    {"label": "Peak", "file": "images/arena/arena2.png"},
 ]
 
 
-def load_arena_images():
-    """Loads arena images and returns them as options like before."""
+def _initialize_arenas():
+    """Initialize arena options at module load time."""
     arenas = []
     for arena in ARENA_IMAGE_PATHS:
         try:
-            # Load and convert for best display performance
-            img = pygame.image.load(arena["file"]).convert()
-            arenas.append({"label": arena["label"], "image": img})
+            if os.path.exists(arena["file"]):
+                img = pygame.image.load(arena["file"])
+                arenas.append({"label": arena["label"], "image": img})
+            else:
+                print(f"Warning: {arena['file']} not found, using fallback color")
+                arenas.append({"label": arena["label"], "image": None, "color": (30, 30, 30)})
         except Exception as e:
-            # Fallback to a plain color if image can't load (optional)
             print(f"Error loading {arena['file']}: {e}")
-            arenas.append({"label": arena["label"], "image": None})
+            arenas.append({"label": arena["label"], "image": None, "color": (30, 30, 30)})
     return arenas
 
-# ARENA_OPTIONS is now built at runtime after loading images
-ARENA_OPTIONS = [] # Will be loaded with images later
+
+ARENA_OPTIONS = _initialize_arenas()
+
 
 def ensure_customization(data):
     custom = data.get("customization", {})
@@ -36,17 +41,26 @@ def ensure_customization(data):
     data["customization"] = custom
     return custom
 
+
 def paint_arena(screen, custom):
-    # Fill the screen with the currently selected arena image (scaled to screen)
-    arena = ARENA_OPTIONS[custom.get("arena_index", 0) % len(ARENA_OPTIONS)]
-    image = arena["image"]
-    if image:
-        # Optionally scale the arena image to screen size
-        image = pygame.transform.scale(image, screen.get_size())
-        screen.blit(image, (0, 0))
-    else:
-        # If the image failed to load, fall back to a background color
+    """Paint the arena background using the selected arena image or fallback color."""
+    if not ARENA_OPTIONS:
+        # Fallback if images weren't loaded
         screen.fill((30, 30, 30))
+        return
+    
+    arena = ARENA_OPTIONS[custom.get("arena_index", 0) % len(ARENA_OPTIONS)]
+    image = arena.get("image")
+    
+    if image:
+        # Scale and display the arena image
+        scaled_image = pygame.transform.scale(image, screen.get_size())
+        screen.blit(scaled_image, (0, 0))
+    else:
+        # Fallback to solid color if image failed to load
+        color = arena.get("color", (30, 30, 30))
+        screen.fill(color)
+
 
 def show_customisation(screen, clock, font, big_font, profile_data):
     custom = ensure_customization(profile_data)
@@ -85,7 +99,7 @@ def show_customisation(screen, clock, font, big_font, profile_data):
             if key == "skin_index":
                 label = f"Snake Skin: {SKIN_OPTIONS[custom['skin_index']]['label']}"
             else:
-                label = f"Arena: {ARENA_OPTIONS[custom['arena_index']]['label']}"
+                label = f"Arena: {ARENA_OPTIONS[custom['arena_index']]['label']}" if ARENA_OPTIONS else "Arena: (Loading...)"
             color = (255, 255, 255) if idx == selected else (190, 190, 190)
             screen.blit(font.render(label, True, color), (130, 200 + idx * 60))
         
