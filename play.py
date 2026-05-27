@@ -13,35 +13,84 @@ TEXT_COLOR = (220, 220, 220)
 
 
 def clamp(value, minimum, maximum):
-    """Keep a value inside a minimum/maximum range."""
+    """
+    Keep a value inside a minimum/maximum range.
+    
+    Args:
+        value: The value to constrain
+        minimum: The minimum allowed value
+        maximum: The maximum allowed value
+        
+    Returns:
+        The clamped value
+    """
     return max(minimum, min(value, maximum))
 
 
 def is_opposite(direction_a, direction_b):
-    """Return True if two cardinal directions are exactly opposite."""
+    """
+    Return True if two cardinal directions are exactly opposite.
+    Prevents the snake from reversing into itself.
+    
+    Args:
+        direction_a: First direction tuple (x, y)
+        direction_b: Second direction tuple (x, y)
+        
+    Returns:
+        True if directions are opposite (180 degrees apart)
+    """
     return direction_a[0] == -direction_b[0] and direction_a[1] == -direction_b[1]
 
 
 class Food:
+    """
+    Represents food in the game that the snake must eat to grow and score points.
+    Food spawns at random locations within the arena boundaries.
+    """
+    
     def __init__(self):
-        """Initialize food with a random position on the arena."""
+        """
+        Initialize food with a random position on the arena.
+        """
         self.radius = 8
         self.respawn()
 
     def respawn(self):
-        """Place food somewhere inside the screen boundaries."""
+        """
+        Place food somewhere inside the screen boundaries with padding.
+        """
         self.pos = (
             random.randint(self.radius + 20, SCREEN_WIDTH - self.radius - 20),
             random.randint(self.radius + 20, SCREEN_HEIGHT - self.radius - 20),
         )
 
     def draw(self, screen):
-        """Draw the food as a small circle."""
+        """
+        Draw the food as a small circle on the screen.
+        
+        Args:
+            screen: The pygame display surface to draw on
+        """
         pygame.draw.circle(screen, FOOD_COLOR, (int(self.pos[0]), int(self.pos[1])), self.radius)
 
 
 class Snake:
+    """
+    Represents the player's snake in the game.
+    Manages the snake's position, movement, growth, and collision detection.
+    The snake wraps around screen edges and can grow by eating food.
+    """
+    
     def __init__(self, x, y, body_color, head_color):
+        """
+        Initialize a snake at the given position with specified colors.
+        
+        Args:
+            x: Initial x position of the snake head
+            y: Initial y position of the snake head
+            body_color: RGB tuple for the snake's body color
+            head_color: RGB tuple for the snake's head color
+        """
         self.points = [(float(x), float(y))]
         self.direction = (1.0, 0.0)
         self.speed = 4.0
@@ -55,7 +104,17 @@ class Snake:
         self.dead = False
 
     def wrap(self, x, y):
-        """Wrap coordinates around the screen when the head crosses the edge."""
+        """
+        Wrap coordinates around the screen when the head crosses the edge.
+        Allows the snake to exit one side and re-enter from the opposite side.
+        
+        Args:
+            x: The x coordinate to wrap
+            y: The y coordinate to wrap
+            
+        Returns:
+            Tuple of wrapped (x, y) coordinates
+        """
         if x < 0:
             x += SCREEN_WIDTH
         elif x > SCREEN_WIDTH:
@@ -69,7 +128,15 @@ class Snake:
         return x, y
 
     def update(self, direction, accelerate, settings):
-        """Move the snake in the current direction and grow the body over time."""
+        """
+        Move the snake in the current direction and grow the body over time.
+        Updates position, speed, and body segments based on input.
+        
+        Args:
+            direction: Tuple (x, y) indicating movement direction, or None to keep current
+            accelerate: Boolean indicating if the snake should speed up
+            settings: Dictionary containing game settings like acceleration_rate
+        """
         self.direction = direction or self.direction
         accel_rate = settings.get("acceleration_rate", 0.08)
         self.speed += accel_rate if accelerate else -0.05
@@ -86,11 +153,23 @@ class Snake:
             self.points.pop(0)
 
     def grow(self, amount):
-        """Increase snake length by extending the target body size."""
+        """
+        Increase snake length by extending the target body size.
+        Called when the snake eats food.
+        
+        Args:
+            amount: The number of segments to add to the snake
+        """
         self.target_length += amount
 
     def draw(self, screen):
-        """Render the snake body and head as circles on the screen."""
+        """
+        Render the snake body and head as circles on the screen.
+        The head is drawn with a different color and larger radius.
+        
+        Args:
+            screen: The pygame display surface to draw on
+        """
         total = len(self.points)
         for index, point in enumerate(self.points):
             x, y = int(point[0]), int(point[1])
@@ -100,10 +179,22 @@ class Snake:
                 pygame.draw.circle(screen, self.body_color, (x, y), self.body_radius)
 
     def head_position(self):
-        """Return the current head position."""
+        """
+        Return the current head position of the snake.
+        
+        Returns:
+            Tuple of (x, y) coordinates for the snake's head
+        """
         return self.points[-1]
 
     def check_self_collision(self):
+        """
+        Check if the snake's head has collided with its own body.
+        Allows some tail buffer before collision (skips last 12 segments).
+        
+        Returns:
+            True if the head is colliding with the body, False otherwise
+        """
         head_x, head_y = self.head_position()
         for point in self.points[:-12]:
             px, py = point
@@ -112,13 +203,31 @@ class Snake:
         return False
 
     def check_food_collision(self, food):
-        """Return True if the snake head is overlapping the food."""
+        """
+        Return True if the snake head is overlapping the food.
+        Uses distance formula for circular collision detection.
+        
+        Args:
+            food: The Food object to check collision with
+            
+        Returns:
+            True if the head is touching the food, False otherwise
+        """
         head_x, head_y = self.head_position()
         fx, fy = food.pos
         return (head_x - fx) ** 2 + (head_y - fy) ** 2 < (self.head_radius + food.radius) ** 2
 
     def check_collision_with_segments(self, segments):
-        """Return True when the head collides with any given body segment list."""
+        """
+        Return True when the head collides with any given body segment list.
+        Used for checking collision with opponent's snake in duo mode.
+        
+        Args:
+            segments: List of (x, y) coordinate tuples representing snake body
+            
+        Returns:
+            True if the head is colliding with any segment, False otherwise
+        """
         head_x, head_y = self.head_position()
         for point in segments:
             px, py = point
@@ -128,7 +237,14 @@ class Snake:
 
 
 def paint_arena(screen, profile_data):
-    """Paint the playing arena using the selected customization image or fallback color."""
+    """
+    Paint the playing arena using the selected customization image or fallback color.
+    Scales the background to fit the current screen size.
+    
+    Args:
+        screen: The pygame display surface to draw on
+        profile_data: Dictionary containing customization and other profile settings
+    """
     if not ARENA_OPTIONS:
         # Fallback if images weren't loaded
         screen.fill((30, 30, 30))
@@ -140,7 +256,7 @@ def paint_arena(screen, profile_data):
     image = arena.get("image")
     
     if image:
-        # Scale and display the arena image
+        # Scale and display the arena image to fit the current screen size
         scaled_image = pygame.transform.scale(image, screen.get_size())
         screen.blit(scaled_image, (0, 0))
     else:
@@ -150,7 +266,22 @@ def paint_arena(screen, profile_data):
 
 
 def run_match(screen, clock, font, big_font, profile_data, mode):
-    """Run a single game match in solo or duo mode."""
+    """
+    Run a single game match in solo or duo mode.
+    Handles gameplay loop, collision detection, scoring, and game over logic.
+    Supports resizable windows.
+    
+    Args:
+        screen: The pygame display surface (may be resizable)
+        clock: The pygame clock for frame rate control
+        font: The pygame font object for regular text
+        big_font: The pygame font object for title text
+        profile_data: Dictionary containing player profile and settings
+        mode: Game mode - "solo" for single player or "duo" for two players
+        
+    Returns:
+        The next game state ("menu" to return, "quit" to exit)
+    """
     custom = profile_data.get("customization", {})
     skin_index = custom.get("skin_index", 0) % len(SKIN_OPTIONS)
     skin = SKIN_OPTIONS[skin_index]
@@ -308,16 +439,41 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
 
 
 def draw_label(screen, font, text, x, y):
-    """Draw a single text label at the given position."""
+    """
+    Draw a single text label at the given position.
+    
+    Args:
+        screen: The pygame display surface to draw on
+        font: The pygame font object for rendering text
+        text: The text string to display
+        x: The x coordinate for the label
+        y: The y coordinate for the label
+    """
     screen.blit(font.render(text, True, TEXT_COLOR), (x, y))
 
 
 def show_play_menu(screen, clock, font, big_font, profile_data):
-    """Display the play menu and return the selected game mode."""
+    """
+    Display the play menu where the user selects between solo and duo modes.
+    Handles menu navigation and launches the selected game mode.
+    
+    Args:
+        screen: The pygame display surface (may be resizable)
+        clock: The pygame clock for frame rate control
+        font: The pygame font object for regular text
+        big_font: The pygame font object for title text
+        profile_data: Dictionary containing player profile information
+        
+    Returns:
+        The next game state ("menu" to return, "quit" to exit, or the result of run_match)
+    """
     options = ["Solo", "Play with friend"]
     selected = 0
 
     while True:
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        
         # Menu event loop: choose solo or local duo play.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -335,14 +491,14 @@ def show_play_menu(screen, clock, font, big_font, profile_data):
 
         screen.fill((12, 18, 42))
         title = big_font.render("Play", True, (245, 245, 245))
-        screen.blit(title, title.get_rect(center=(SCREEN_WIDTH / 2, 100)))
+        screen.blit(title, title.get_rect(center=(screen_width / 2, 100)))
 
         for idx, label in enumerate(options):
             color = (255, 255, 255) if idx == selected else (180, 180, 180)
-            screen.blit(font.render(label, True, color), (SCREEN_WIDTH / 2 - 90, 220 + idx * 70))
+            screen.blit(font.render(label, True, color), (screen_width / 2 - 90, 220 + idx * 70))
 
         hint = font.render("Use UP/DOWN and ENTER. ESC to go back.", True, (190, 190, 190))
-        screen.blit(hint, (SCREEN_WIDTH / 2 - 190, SCREEN_HEIGHT - 90))
+        screen.blit(hint, (screen_width / 2 - 190, screen_height - 90))
 
         pygame.display.flip()
         clock.tick(60)

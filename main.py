@@ -14,14 +14,33 @@ BACKGROUND_COLOR = (12, 18, 42)
 
 
 def draw_button(screen, font, rect, label, hover=False):
-    # Draw a rounded rectangular button with centered text.
+    """
+    Draw a rounded rectangular button with centered text.
+    
+    Args:
+        screen: The pygame display surface to draw on
+        font: The pygame font object for rendering text
+        rect: The pygame Rect defining button position and size
+        label: The text label to display on the button
+        hover: Boolean indicating if button is hovered (changes color)
+    """
     pygame.draw.rect(screen, BUTTON_HOVER if hover else BUTTON_COLOR, rect, border_radius=12)
     text_surface = font.render(label, True, BUTTON_TEXT)
     screen.blit(text_surface, text_surface.get_rect(center=rect.center))
 
 
 def run_main_menu(screen, clock, font, title_font, profile_data):
-    # Display the main menu and return the selected next state.
+    """
+    Display the main menu and handle user input to navigate to different game screens.
+    Returns the selected next state (play, profile, customisation, settings, quit, or menu).
+    
+    Args:
+        screen: The pygame display surface
+        clock: The pygame clock for frame rate control
+        font: The pygame font object for regular text
+        title_font: The pygame font object for title text
+        profile_data: Dictionary containing player profile information
+    """
     buttons = [
         {"label": "Play", "action": "play"},
         {"label": "Profile", "action": "profile"},
@@ -35,7 +54,7 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
 
     for index, button in enumerate(buttons):
         rect = pygame.Rect(
-            (SCREEN_WIDTH - button_width) // 2,
+            (screen.get_width() - button_width) // 2,
             start_y + index * (button_height + 18),
             button_width,
             button_height,
@@ -58,8 +77,8 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
         screen.fill(BACKGROUND_COLOR)
         title_surface = title_font.render("Slim Snakey", True, (240, 240, 240))
         subtitle_surface = font.render("A local multiplayer snake game", True, (200, 200, 220))
-        screen.blit(title_surface, title_surface.get_rect(center=(SCREEN_WIDTH // 2, 100)))
-        screen.blit(subtitle_surface, subtitle_surface.get_rect(center=(SCREEN_WIDTH // 2, 150)))
+        screen.blit(title_surface, title_surface.get_rect(center=(screen.get_width() // 2, 100)))
+        screen.blit(subtitle_surface, subtitle_surface.get_rect(center=(screen.get_width() // 2, 150)))
 
         for rect, action_key, label in button_rects:
             hover = rect.collidepoint(mouse_pos)
@@ -67,22 +86,27 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
 
         stats_text = f"High score: {profile_data.get('high_score', 0)}  |  Food: {profile_data.get('food_consumed', 0)}"
         stats_surface = font.render(stats_text, True, (190, 190, 220))
-        screen.blit(stats_surface, stats_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 40)))
+        screen.blit(stats_surface, stats_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() - 40)))
 
         pygame.display.flip()
         clock.tick(60)
 
-# The main program
+
 def main():
+    """
+    Main program loop that initializes pygame, sets up the game window,
+    and manages navigation between different screens (menu, play, profile, customisation, settings).
+    """
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    # Create a resizable game window
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Slim Snakey")
     clock = pygame.time.Clock()
 
     font = pygame.font.SysFont(None, 32)
     title_font = pygame.font.SysFont(None, 72)
 
-    profile_data = {}
+    profile_data = load_player_profile_data()
 
     # The main game loop: keep switching between screens until quit.
     state = "menu"

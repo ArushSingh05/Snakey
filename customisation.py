@@ -15,7 +15,13 @@ ARENA_IMAGE_PATHS = [
 
 
 def _initialize_arenas():
-    """Initialize arena options at module load time."""
+    """
+    Initialize arena options at module load time.
+    Loads arena images and provides fallback colors if images are not found.
+    
+    Returns:
+        List of arena dictionaries with 'label', 'image', and optional 'color' keys.
+    """
     arenas = []
     for arena in ARENA_IMAGE_PATHS:
         try:
@@ -35,6 +41,16 @@ ARENA_OPTIONS = _initialize_arenas()
 
 
 def ensure_customization(data):
+    """
+    Ensure the profile data dictionary has all required customization keys.
+    Provides default values if keys are missing.
+    
+    Args:
+        data: The profile data dictionary to validate
+        
+    Returns:
+        The customization sub-dictionary with all required keys present
+    """
     custom = data.get("customization", {})
     custom.setdefault("skin_index", 0)
     custom.setdefault("arena_index", 0)
@@ -43,7 +59,14 @@ def ensure_customization(data):
 
 
 def paint_arena(screen, custom):
-    """Paint the arena background using the selected arena image or fallback color."""
+    """
+    Paint the arena background using the selected arena image or fallback color.
+    Scales the arena image to fit the current screen size and centers it.
+    
+    Args:
+        screen: The pygame display surface to draw on
+        custom: The customization dictionary containing arena_index
+    """
     if not ARENA_OPTIONS:
         # Fallback if images weren't loaded
         screen.fill((30, 30, 30))
@@ -53,7 +76,7 @@ def paint_arena(screen, custom):
     image = arena.get("image")
     
     if image:
-        # Scale and display the arena image
+        # Scale and display the arena image to fit the screen size
         scaled_image = pygame.transform.scale(image, screen.get_size())
         screen.blit(scaled_image, (0, 0))
     else:
@@ -63,11 +86,28 @@ def paint_arena(screen, custom):
 
 
 def show_customisation(screen, clock, font, big_font, profile_data):
+    """
+    Display the customization menu where the user can select snake skins and arenas.
+    Allows navigation with arrow keys and selection with Enter. Supports resizable window.
+    
+    Args:
+        screen: The pygame display surface (may be resizable)
+        clock: The pygame clock for frame rate control
+        font: The pygame font object for regular text
+        big_font: The pygame font object for title text
+        profile_data: Dictionary containing player profile information
+        
+    Returns:
+        The next game state ("menu" to return to main menu, "quit" to exit)
+    """
     custom = ensure_customization(profile_data)
     selected = 0
     options = ["skin_index", "arena_index"]
 
     while True:
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
@@ -93,7 +133,7 @@ def show_customisation(screen, clock, font, big_font, profile_data):
 
         paint_arena(screen, custom)
         title = big_font.render("Customization", True, (245, 245, 245))
-        screen.blit(title, title.get_rect(center=(400, 80)))
+        screen.blit(title, title.get_rect(center=(screen_width // 2, 80)))
 
         for idx, key in enumerate(options):
             if key == "skin_index":
@@ -108,7 +148,7 @@ def show_customisation(screen, clock, font, big_font, profile_data):
         pygame.draw.circle(screen, skin["head"], (600, 230), 18)
 
         back_text = font.render("ESC to go back", True, (220, 220, 220))
-        screen.blit(back_text, (100, 520))
+        screen.blit(back_text, (100, screen_height - 80))
 
         pygame.display.flip()
         clock.tick(60)
