@@ -71,7 +71,7 @@ def show_settings(screen, clock, font, big_font, profile_data):
                     settings[key] = min(0.18, settings[key] + 0.01)
                 if event.key == pygame.K_RETURN:
                     return "menu"
-
+# heyt
         screen.fill((14, 18, 35))
         title = big_font.render("Settings", True, (235, 235, 235))
         screen.blit(title, title.get_rect(center=(screen_width // 2, 80)))
