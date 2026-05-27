@@ -7,7 +7,16 @@ DEFAULT_SETTINGS = {
 
 
 def ensure_settings(data):
-    """Ensure profile data has all settings values defined."""
+    """
+    Ensure profile data has all settings values defined.
+    Provides default values for any missing settings keys.
+    
+    Args:
+        data: The profile data dictionary to validate
+        
+    Returns:
+        The settings sub-dictionary with all required keys present
+    """
     settings = data.get("settings", {})
     for key, default in DEFAULT_SETTINGS.items():
         settings.setdefault(key, default)
@@ -16,7 +25,21 @@ def ensure_settings(data):
 
 
 def show_settings(screen, clock, font, big_font, profile_data):
-    """Display settings and allow the user to modify control sensitivity values."""
+    """
+    Display settings menu where the user can modify game control sensitivity values.
+    Allows adjustment of turn sensitivity and acceleration rate using arrow keys.
+    Supports resizable window.
+    
+    Args:
+        screen: The pygame display surface (may be resizable)
+        clock: The pygame clock for frame rate control
+        font: The pygame font object for regular text
+        big_font: The pygame font object for title text
+        profile_data: Dictionary containing player profile and settings
+        
+    Returns:
+        The next game state ("menu" to return, "quit" to exit)
+    """
     settings = ensure_settings(profile_data)
     option_index = 0
     options = ["turn_sensitivity", "acceleration_rate"]
@@ -26,6 +49,9 @@ def show_settings(screen, clock, font, big_font, profile_data):
     }
 
     while True:
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        
         # Event loop for the settings screen.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,7 +74,7 @@ def show_settings(screen, clock, font, big_font, profile_data):
 
         screen.fill((14, 18, 35))
         title = big_font.render("Settings", True, (235, 235, 235))
-        screen.blit(title, title.get_rect(center=(400, 80)))
+        screen.blit(title, title.get_rect(center=(screen_width // 2, 80)))
 
         for idx, key in enumerate(options):
             label_text = f"{value_labels[key]}: {settings[key]:.2f}"
@@ -57,7 +83,7 @@ def show_settings(screen, clock, font, big_font, profile_data):
             screen.blit(label, (140, 200 + idx * 60))
 
         help_text = font.render("Use UP/DOWN to select, LEFT/RIGHT to change, ESC to go back", True, (192, 192, 192))
-        screen.blit(help_text, (100, 520))
+        screen.blit(help_text, (100, screen_height - 80))
 
         pygame.display.flip()
         clock.tick(60)
