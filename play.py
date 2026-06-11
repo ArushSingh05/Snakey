@@ -11,132 +11,102 @@ SCREEN_HEIGHT = 600
 FOOD_COLOR = (250, 190, 45)
 TEXT_COLOR = (220, 220, 220)
 
+BASE_HEAD_RADIUS = 11
+BASE_BODY_RADIUS = 9
+BASE_FOOD_RADIUS = 8
+
 
 def clamp(value, minimum, maximum):
-    """
-    Keep a value inside a minimum/maximum range.
-    
-    Args:
-        value: The value to constrain
-        minimum: The minimum allowed value
-        maximum: The maximum allowed value
-        
-    Returns:
-        The clamped value
-    """
+    # Keep value within min/max range
     return max(minimum, min(value, maximum))
 
 
 def is_opposite(direction_a, direction_b):
-    """
-    Return True if two cardinal directions are exactly opposite.
-    Prevents the snake from reversing into itself.
-    
-    Args:
-        direction_a: First direction tuple (x, y)
-        direction_b: Second direction tuple (x, y)
-        
-    Returns:
-        True if directions are opposite (180 degrees apart)
-    """
+    # Check if directions are 180 degrees apart
     return direction_a[0] == -direction_b[0] and direction_a[1] == -direction_b[1]
 
 
+def get_scale_factor(screen):
+    # Calculate scale factor based on screen size
+    screen_width = screen.get_width()
+    screen_height = screen.get_height()
+    width_scale = screen_width / SCREEN_WIDTH
+    height_scale = screen_height / SCREEN_HEIGHT
+    return min(width_scale, height_scale)
+
+
 class Food:
-    """
-    Represents food in the game that the snake must eat to grow and score points.
-    Food spawns at random locations within the arena boundaries.
-    """
+    # Food that snake eats to grow and score points
     
-    def __init__(self):
-        """
-        Initialize food with a random position on the arena.
-        """
-        self.radius = 8
+    def __init__(self, screen):
+        self.screen = screen
+        self.base_radius = BASE_FOOD_RADIUS
         self.respawn()
 
+    @property
+    def radius(self):
+        scale = get_scale_factor(self.screen)
+        return max(4, int(self.base_radius * scale))
+
     def respawn(self):
-        """
-        Place food somewhere inside the screen boundaries with padding.
-        """
+        # Place food at random location inside boundaries
+        screen_width = self.screen.get_width()
+        screen_height = self.screen.get_height()
         self.pos = (
-            random.randint(self.radius + 20, SCREEN_WIDTH - self.radius - 20),
-            random.randint(self.radius + 20, SCREEN_HEIGHT - self.radius - 20),
+            random.randint(self.radius + 20, screen_width - self.radius - 20),
+            random.randint(self.radius + 20, screen_height - self.radius - 20),
         )
 
     def draw(self, screen):
-        """
-        Draw the food as a small circle on the screen.
-        
-        Args:
-            screen: The pygame display surface to draw on
-        """
         pygame.draw.circle(screen, FOOD_COLOR, (int(self.pos[0]), int(self.pos[1])), self.radius)
 
 
 class Snake:
-    """
-    Represents the player's snake in the game.
-    Manages the snake's position, movement, growth, and collision detection.
-    The snake wraps around screen edges and can grow by eating food.
-    """
+    # Player snake that moves and grows by eating food
     
-    def __init__(self, x, y, body_color, head_color):
-        """
-        Initialize a snake at the given position with specified colors.
-        
-        Args:
-            x: Initial x position of the snake head
-            y: Initial y position of the snake head
-            body_color: RGB tuple for the snake's body color
-            head_color: RGB tuple for the snake's head color
-        """
+    def __init__(self, x, y, body_color, head_color, screen):
+        self.screen = screen
         self.points = [(float(x), float(y))]
         self.direction = (1.0, 0.0)
         self.speed = 4.0
         self.target_length = 40
         self.max_speed = 7.0
         self.min_speed = 2.8
-        self.head_radius = 11
-        self.body_radius = 9
+        self.base_head_radius = BASE_HEAD_RADIUS
+        self.base_body_radius = BASE_BODY_RADIUS
         self.body_color = body_color
         self.head_color = head_color
         self.dead = False
 
+    @property
+    def head_radius(self):
+        scale = get_scale_factor(self.screen)
+        return max(5, int(self.base_head_radius * scale))
+
+    @property
+    def body_radius(self):
+        scale = get_scale_factor(self.screen)
+        return max(4, int(self.base_body_radius * scale))
+
     def wrap(self, x, y):
-        """
-        Wrap coordinates around the screen when the head crosses the edge.
-        Allows the snake to exit one side and re-enter from the opposite side.
+        # Wrap coordinates around screen edges
+        screen_width = self.screen.get_width()
+        screen_height = self.screen.get_height()
         
-        Args:
-            x: The x coordinate to wrap
-            y: The y coordinate to wrap
-            
-        Returns:
-            Tuple of wrapped (x, y) coordinates
-        """
         if x < 0:
-            x += SCREEN_WIDTH
-        elif x > SCREEN_WIDTH:
-            x -= SCREEN_WIDTH
+            x += screen_width
+        elif x > screen_width:
+            x -= screen_width
 
         if y < 0:
-            y += SCREEN_HEIGHT
-        elif y > SCREEN_HEIGHT:
-            y -= SCREEN_HEIGHT
+            y += screen_height
+        elif y > screen_height:
+            y -= screen_height
 
         return x, y
 
     def update(self, direction, accelerate, settings):
-        """
-        Move the snake in the current direction and grow the body over time.
-        Updates position, speed, and body segments based on input.
-        
-        Args:
-            direction: Tuple (x, y) indicating movement direction, or None to keep current
-            accelerate: Boolean indicating if the snake should speed up
-            settings: Dictionary containing game settings like acceleration_rate
-        """
+        # Move snake and manage body segments
         self.direction = direction or self.direction
         accel_rate = settings.get("acceleration_rate", 0.08)
         self.speed += accel_rate if accelerate else -0.05
@@ -148,28 +118,15 @@ class Snake:
         new_head = self.wrap(head_x + dx, head_y + dy)
         self.points.append(new_head)
 
-        # Remove oldest body point when the snake exceeds its target length.
         if len(self.points) > self.target_length:
             self.points.pop(0)
 
     def grow(self, amount):
-        """
-        Increase snake length by extending the target body size.
-        Called when the snake eats food.
-        
-        Args:
-            amount: The number of segments to add to the snake
-        """
+        # Increase target body length
         self.target_length += amount
 
     def draw(self, screen):
-        """
-        Render the snake body and head as circles on the screen.
-        The head is drawn with a different color and larger radius.
-        
-        Args:
-            screen: The pygame display surface to draw on
-        """
+        # Render snake body and head as circles
         total = len(self.points)
         for index, point in enumerate(self.points):
             x, y = int(point[0]), int(point[1])
@@ -179,74 +136,46 @@ class Snake:
                 pygame.draw.circle(screen, self.body_color, (x, y), self.body_radius)
 
     def head_position(self):
-        """
-        Return the current head position of the snake.
-        
-        Returns:
-            Tuple of (x, y) coordinates for the snake's head
-        """
         return self.points[-1]
 
     def check_self_collision(self):
-        """
-        Check if the snake's head has collided with its own body.
-        Allows some tail buffer before collision (skips last 12 segments).
-        
-        Returns:
-            True if the head is colliding with the body, False otherwise
-        """
+        # Check if head collides with body (skip tail buffer)
         head_x, head_y = self.head_position()
-        for point in self.points[:-12]:
+        head_radius = self.head_radius
+        body_radius = self.body_radius
+        collision_dist = (head_radius + body_radius) ** 2
+        
+        for point in self.points[20:-20]:
             px, py = point
-            if (head_x - px) ** 2 + (head_y - py) ** 2 < (self.head_radius + self.body_radius) ** 2:
+            if (head_x - px) ** 2 + (head_y - py) ** 2 < collision_dist:
                 return True
         return False
 
     def check_food_collision(self, food):
-        """
-        Return True if the snake head is overlapping the food.
-        Uses distance formula for circular collision detection.
-        
-        Args:
-            food: The Food object to check collision with
-            
-        Returns:
-            True if the head is touching the food, False otherwise
-        """
+        # Check if head overlaps with food
         head_x, head_y = self.head_position()
+        head_radius = self.head_radius
+        food_radius = food.radius
         fx, fy = food.pos
-        return (head_x - fx) ** 2 + (head_y - fy) ** 2 < (self.head_radius + food.radius) ** 2
+        return (head_x - fx) ** 2 + (head_y - fy) ** 2 < (head_radius + food_radius) ** 2
 
     def check_collision_with_segments(self, segments):
-        """
-        Return True when the head collides with any given body segment list.
-        Used for checking collision with opponent's snake in duo mode.
-        
-        Args:
-            segments: List of (x, y) coordinate tuples representing snake body
-            
-        Returns:
-            True if the head is colliding with any segment, False otherwise
-        """
+        # Check if head collides with opponent snake
         head_x, head_y = self.head_position()
+        head_radius = self.head_radius
+        body_radius = self.body_radius
+        collision_dist = (head_radius + body_radius - 2) ** 2
+        
         for point in segments:
             px, py = point
-            if (head_x - px) ** 2 + (head_y - py) ** 2 < (self.head_radius + self.body_radius) ** 2:
+            if (head_x - px) ** 2 + (head_y - py) ** 2 < collision_dist:
                 return True
         return False
 
 
 def paint_arena(screen, profile_data):
-    """
-    Paint the playing arena using the selected customization image or fallback color.
-    Scales the background to fit the current screen size.
-    
-    Args:
-        screen: The pygame display surface to draw on
-        profile_data: Dictionary containing customization and other profile settings
-    """
+    # Draw arena background with image or fallback color
     if not ARENA_OPTIONS:
-        # Fallback if images weren't loaded
         screen.fill((30, 30, 30))
         return
     
@@ -256,61 +185,44 @@ def paint_arena(screen, profile_data):
     image = arena.get("image")
     
     if image:
-        # Scale and display the arena image to fit the current screen size
         scaled_image = pygame.transform.scale(image, screen.get_size())
         screen.blit(scaled_image, (0, 0))
     else:
-        # Fallback to solid color if image failed to load
         color = arena.get("color", (30, 30, 30))
         screen.fill(color)
 
 
 def run_match(screen, clock, font, big_font, profile_data, mode):
-    """
-    Run a single game match in solo or duo mode.
-    Handles gameplay loop, collision detection, scoring, and game over logic.
-    Supports resizable windows.
-    
-    Args:
-        screen: The pygame display surface (may be resizable)
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        big_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile and settings
-        mode: Game mode - "solo" for single player or "duo" for two players
-        
-    Returns:
-        The next game state ("menu" to return, "quit" to exit)
-    """
+    # Main game loop for solo or duo mode
     custom = profile_data.get("customization", {})
     skin_index = custom.get("skin_index", 0) % len(SKIN_OPTIONS)
     skin = SKIN_OPTIONS[skin_index]
     settings = profile_data.get("settings", {})
 
-    snake = Snake(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2, skin["body"], skin["head"])
+    screen_width = screen.get_width()
+    screen_height = screen.get_height()
+    
+    snake = Snake(screen_width / 4, screen_height / 2, skin["body"], skin["head"], screen)
     score = 0
-    food = Food()
+    food = Food(screen)
     player_two = None
     score_two = 0
     winner = None
 
     if mode == "duo":
-        player_two = Snake(3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2, (240, 110, 110), (255, 170, 170))
+        player_two = Snake(3 * screen_width / 4, screen_height / 2, (240, 110, 110), (255, 170, 170), screen)
 
-    # Use my_sprite Enemy as a moving arena hazard.
     hazard = Enemy(100, 120, 64, 64, "images/enemy/test", screen, extension="jpg")
 
     game_over = False
     running = True
 
-    # Game loop for the current match.
     while running:
         direction_one = snake.direction
         accelerate_one = False
         direction_two = player_two.direction if player_two else None
         accelerate_two = False
 
-        # Handle input events such as quitting, escaping back to menu, and restart.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 save_profile_data(profile_data)
@@ -322,7 +234,6 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
                 if event.key == pygame.K_SPACE and game_over:
                     return run_match(screen, clock, font, big_font, profile_data, mode)
 
-        # Use key state to update the direction for each player.
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             new_dir = (-1.0, 0.0)
@@ -364,7 +275,6 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
             if player_two:
                 player_two.update(direction_two, accelerate_two, settings)
 
-            # Check food collisions for each snake and respawn food if eaten.
             if snake.check_food_collision(food):
                 score += 1
                 profile_data["food_consumed"] = profile_data.get("food_consumed", 0) + 1
@@ -377,16 +287,23 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
                 player_two.grow(14)
                 food.respawn()
 
-            # Update hazard and check for collisions with player snakes.
             hazard.update()
-            if hazard.get_rect().colliderect(pygame.Rect(int(snake.head_position()[0] - snake.head_radius), int(snake.head_position()[1] - snake.head_radius), snake.head_radius * 2, snake.head_radius * 2)):
+            head_x = int(snake.head_position()[0])
+            head_y = int(snake.head_position()[1])
+            head_radius = snake.head_radius
+
+            if hazard.get_rect().colliderect(pygame.Rect(head_x - head_radius, head_y - head_radius, head_radius * 2, head_radius * 2)):
                 game_over = True
                 winner = "Player 2" if player_two else None
-            if player_two and hazard.get_rect().colliderect(pygame.Rect(int(player_two.head_position()[0] - player_two.head_radius), int(player_two.head_position()[1] - player_two.head_radius), player_two.head_radius * 2, player_two.head_radius * 2)):
-                game_over = True
-                winner = "Player 1"
+            if player_two:
+                head_x_p2 = int(player_two.head_position()[0])
+                head_y_p2 = int(player_two.head_position()[1])
+                head_radius_p2 = player_two.head_radius
+                
+                if hazard.get_rect().colliderect(pygame.Rect(head_x_p2 - head_radius_p2, head_y_p2 - head_radius_p2, head_radius_p2 * 2, head_radius_p2 * 2)):
+                    game_over = True
+                    winner = "Player 1"
 
-            # Check collisions against self and opponent.
             if snake.check_self_collision():
                 game_over = True
                 winner = "Player 2" if player_two else None
@@ -402,7 +319,6 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
                     winner = "Player 1"
 
             if game_over:
-                # Update profile stats on match end.
                 profile_data["games_played"] = profile_data.get("games_played", 0) + 1
                 profile_data["deaths"] = profile_data.get("deaths", 0) + 1
                 if score > profile_data.get("high_score", 0):
@@ -418,19 +334,22 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
             player_two.draw(screen)
         hazard.draw()
 
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+
         if player_two:
             draw_label(screen, font, f"P1: {score}", 24, 24)
             draw_label(screen, font, f"P2: {score_two}", 24, 54)
         else:
             draw_label(screen, font, f"Score: {score}", 24, 24)
-        draw_label(screen, font, f"Press ESC to return", 24, SCREEN_HEIGHT - 40)
+        draw_label(screen, font, f"Press ESC to return", 24, screen_height - 40)
 
         if game_over:
             game_over_text = "Game Over"
             if winner:
                 game_over_text = f"{winner} wins!"
-            screen.blit(big_font.render(game_over_text, True, TEXT_COLOR), (SCREEN_WIDTH / 2 - 180, SCREEN_HEIGHT / 2 - 40))
-            screen.blit(font.render("Press SPACE to restart", True, TEXT_COLOR), (SCREEN_WIDTH / 2 - 130, SCREEN_HEIGHT / 2 + 20))
+            screen.blit(big_font.render(game_over_text, True, TEXT_COLOR), (screen_width / 2 - 180, screen_height / 2 - 40))
+            screen.blit(font.render("Press SPACE to restart", True, TEXT_COLOR), (screen_width / 2 - 130, screen_height / 2 + 20))
 
         pygame.display.flip()
         clock.tick(60)
@@ -439,34 +358,12 @@ def run_match(screen, clock, font, big_font, profile_data, mode):
 
 
 def draw_label(screen, font, text, x, y):
-    """
-    Draw a single text label at the given position.
-    
-    Args:
-        screen: The pygame display surface to draw on
-        font: The pygame font object for rendering text
-        text: The text string to display
-        x: The x coordinate for the label
-        y: The y coordinate for the label
-    """
+    # Draw text label at position
     screen.blit(font.render(text, True, TEXT_COLOR), (x, y))
 
 
 def show_play_menu(screen, clock, font, big_font, profile_data):
-    """
-    Display the play menu where the user selects between solo and duo modes.
-    Handles menu navigation and launches the selected game mode.
-    
-    Args:
-        screen: The pygame display surface (may be resizable)
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        big_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile information
-        
-    Returns:
-        The next game state ("menu" to return, "quit" to exit, or the result of run_match)
-    """
+    # Menu to select solo or duo mode
     options = ["Solo", "Play with friend"]
     selected = 0
 
@@ -474,7 +371,6 @@ def show_play_menu(screen, clock, font, big_font, profile_data):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         
-        # Menu event loop: choose solo or local duo play.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
