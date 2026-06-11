@@ -14,33 +14,14 @@ BACKGROUND_COLOR = (12, 18, 42)
 
 
 def draw_button(screen, font, rect, label, hover=False):
-    """
-    Draw a rounded rectangular button with centered text.
-    
-    Args:
-        screen: The pygame display surface to draw on
-        font: The pygame font object for rendering text
-        rect: The pygame Rect defining button position and size
-        label: The text label to display on the button
-        hover: Boolean indicating if button is hovered (changes color)
-    """
+    # Draw rounded button with centered text
     pygame.draw.rect(screen, BUTTON_HOVER if hover else BUTTON_COLOR, rect, border_radius=12)
     text_surface = font.render(label, True, BUTTON_TEXT)
     screen.blit(text_surface, text_surface.get_rect(center=rect.center))
 
 
 def run_main_menu(screen, clock, font, title_font, profile_data):
-    """
-    Display the main menu and handle user input to navigate to different game screens.
-    Returns the selected next state (play, profile, customisation, settings, quit, or menu).
-    
-    Args:
-        screen: The pygame display surface
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        title_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile information
-    """
+    # Display main menu and handle navigation between screens
     buttons = [
         {"label": "Play", "action": "play"},
         {"label": "Profile", "action": "profile"},
@@ -61,7 +42,6 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
         )
         button_rects.append((rect, button["action"], button["label"]))
 
-    # Main menu event loop: wait for quit or button clicks.
     while True:
         mouse_pos = pygame.mouse.get_pos()
         action = None
@@ -93,12 +73,8 @@ def run_main_menu(screen, clock, font, title_font, profile_data):
 
 
 def main():
-    """
-    Main program loop that initializes pygame, sets up the game window,
-    and manages navigation between different screens (menu, play, profile, customisation, settings).
-    """
+    # Initialize pygame and manage game state loop
     pygame.init()
-    # Create a resizable game window
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Slim Snakey")
     clock = pygame.time.Clock()
@@ -108,7 +84,6 @@ def main():
 
     profile_data = load_player_profile_data()
 
-    # The main game loop: keep switching between screens until quit.
     state = "menu"
     while state != "quit":
         if state == "menu":
@@ -131,6 +106,5 @@ def main():
     pygame.quit()
 
 
-# Initialise program
 if __name__ == "__main__":
     main()

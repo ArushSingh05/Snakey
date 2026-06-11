@@ -21,13 +21,7 @@ DEFAULT_PROFILE = {
 
 
 def load_player_profile_data():
-    """
-    Load persistent profile data from disk, falling back to defaults if file doesn't exist.
-    Merges saved data with default values to ensure all keys are present.
-    
-    Returns:
-        Dictionary containing complete player profile data with all required keys
-    """
+    # Load profile data from disk or use defaults
     if os.path.exists(PROFILE_FILE):
         try:
             with open(PROFILE_FILE, "r", encoding="utf-8") as handle:
@@ -43,13 +37,7 @@ def load_player_profile_data():
 
 
 def save_profile_data(profile_data):
-    """
-    Write the current profile data back to disk as JSON.
-    Silently fails if there are file system errors.
-    
-    Args:
-        profile_data: Dictionary containing player profile information to save
-    """
+    # Write profile data to disk as JSON
     try:
         with open(PROFILE_FILE, "w", encoding="utf-8") as handle:
             json.dump(profile_data, handle, indent=2)
@@ -58,30 +46,13 @@ def save_profile_data(profile_data):
 
 
 def show_profile(screen, clock, font, big_font, profile_data):
-    """
-    Display the profile screen with saved stats and player information.
-    Shows high score, food consumed, games played, deaths, and K/D ratio.
-    Returns to menu when ESC is pressed or back button is clicked.
-    Supports resizable window.
-    
-    Args:
-        screen: The pygame display surface (may be resizable)
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        big_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile information
-        
-    Returns:
-        The next game state ("menu" to return, "quit" to exit)
-    """
+    # Display profile screen with player stats
     while True:
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         
-        # Back button positioned relative to screen size
         back_rect = pygame.Rect(40, screen_height - 80, 120, 40)
         
-        # Event loop for the profile screen.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"

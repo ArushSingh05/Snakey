@@ -2,23 +2,10 @@ import pygame
 from os.path import exists
 
 class ImageList:
-    """
-    Loads a sequence of numbered image files and provides them as an accessible list.
-    Automatically scales all images to the specified dimensions for consistent sprite rendering.
-    Useful for loading animation frame sequences like "sprite0.png", "sprite1.png", etc.
-    """
+    # Loads numbered image files and scales them for consistent rendering
 
     def __init__(self, filename, width, height, extension="png"):
-        """
-        Initialize ImageList by loading a sequence of numbered image files.
-        Searches for files named like: filename0.ext, filename1.ext, filename2.ext, etc.
-        
-        Args:
-            filename: The path and prefix for image files (without number or extension)
-            width: Target width to scale all images to
-            height: Target height to scale all images to
-            extension: File extension to look for (default: "png")
-        """
+        # filename: path prefix, width/height: target dimensions
         self._images = []
         count = 0
         while exists(f"{filename}{count}.{extension}"):
@@ -29,12 +16,7 @@ class ImageList:
 
     @property
     def images(self):
-        """
-        Get the list of loaded and scaled images.
-        
-        Returns:
-            List of pygame.Surface objects containing the loaded images
-        """
+        # Returns list of loaded and scaled images
         return self._images
 
 

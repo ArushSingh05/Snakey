@@ -15,13 +15,7 @@ ARENA_IMAGE_PATHS = [
 
 
 def _initialize_arenas():
-    """
-    Initialize arena options at module load time.
-    Loads arena images and provides fallback colors if images are not found.
-    
-    Returns:
-        List of arena dictionaries with 'label', 'image', and optional 'color' keys.
-    """
+    # Load arena images with fallback colors if missing
     arenas = []
     for arena in ARENA_IMAGE_PATHS:
         try:
@@ -41,16 +35,7 @@ ARENA_OPTIONS = _initialize_arenas()
 
 
 def ensure_customization(data):
-    """
-    Ensure the profile data dictionary has all required customization keys.
-    Provides default values if keys are missing.
-    
-    Args:
-        data: The profile data dictionary to validate
-        
-    Returns:
-        The customization sub-dictionary with all required keys present
-    """
+    # Ensure all customization keys exist with defaults
     custom = data.get("customization", {})
     custom.setdefault("skin_index", 0)
     custom.setdefault("arena_index", 0)
@@ -59,16 +44,8 @@ def ensure_customization(data):
 
 
 def paint_arena(screen, custom):
-    """
-    Paint the arena background using the selected arena image or fallback color.
-    Scales the arena image to fit the current screen size and centers it.
-    
-    Args:
-        screen: The pygame display surface to draw on
-        custom: The customization dictionary containing arena_index
-    """
+    # Draw arena background image or fallback color
     if not ARENA_OPTIONS:
-        # Fallback if images weren't loaded
         screen.fill((30, 30, 30))
         return
     
@@ -76,30 +53,15 @@ def paint_arena(screen, custom):
     image = arena.get("image")
     
     if image:
-        # Scale and display the arena image to fit the screen size
         scaled_image = pygame.transform.scale(image, screen.get_size())
         screen.blit(scaled_image, (0, 0))
     else:
-        # Fallback to solid color if image failed to load
         color = arena.get("color", (30, 30, 30))
         screen.fill(color)
 
 
 def show_customisation(screen, clock, font, big_font, profile_data):
-    """
-    Display the customization menu where the user can select snake skins and arenas.
-    Allows navigation with arrow keys and selection with Enter. Supports resizable window.
-    
-    Args:
-        screen: The pygame display surface (may be resizable)
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        big_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile information
-        
-    Returns:
-        The next game state ("menu" to return to main menu, "quit" to exit)
-    """
+    # Customization menu to select snake skins and arenas
     custom = ensure_customization(profile_data)
     selected = 0
     options = ["skin_index", "arena_index"]
