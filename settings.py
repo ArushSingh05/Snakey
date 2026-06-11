@@ -7,16 +7,7 @@ DEFAULT_SETTINGS = {
 
 
 def ensure_settings(data):
-    """
-    Ensure profile data has all settings values defined.
-    Provides default values for any missing settings keys.
-    
-    Args:
-        data: The profile data dictionary to validate
-        
-    Returns:
-        The settings sub-dictionary with all required keys present
-    """
+    # Ensure all settings keys exist with defaults
     settings = data.get("settings", {})
     for key, default in DEFAULT_SETTINGS.items():
         settings.setdefault(key, default)
@@ -25,21 +16,7 @@ def ensure_settings(data):
 
 
 def show_settings(screen, clock, font, big_font, profile_data):
-    """
-    Display settings menu where the user can modify game control sensitivity values.
-    Allows adjustment of turn sensitivity and acceleration rate using arrow keys.
-    Supports resizable window.
-    
-    Args:
-        screen: The pygame display surface (may be resizable)
-        clock: The pygame clock for frame rate control
-        font: The pygame font object for regular text
-        big_font: The pygame font object for title text
-        profile_data: Dictionary containing player profile and settings
-        
-    Returns:
-        The next game state ("menu" to return, "quit" to exit)
-    """
+    # Settings menu to adjust game control sensitivity
     settings = ensure_settings(profile_data)
     option_index = 0
     options = ["turn_sensitivity", "acceleration_rate"]
@@ -52,7 +29,6 @@ def show_settings(screen, clock, font, big_font, profile_data):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         
-        # Event loop for the settings screen.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
