@@ -14,7 +14,7 @@ class ImageList:
 
     @property
     def images(self):
-        # Returns list of loaded and scaled images
+        # Returns list of loaded and scaled image
         return self._images
 
 
