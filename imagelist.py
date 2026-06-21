@@ -3,9 +3,7 @@ from os.path import exists
 
 class ImageList:
     # Loads numbered image files and scales them for consistent rendering
-
     def __init__(self, filename, width, height, extension="png"):
-        # filename: path prefix, width/height: target dimensions
         self._images = []
         count = 0
         while exists(f"{filename}{count}.{extension}"):
