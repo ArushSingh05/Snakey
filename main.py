@@ -28,10 +28,10 @@ class BackgroundSnake(Snake):
     """Snake that moves on a grid with 90-degree turns and self-avoidance."""
     def __init__(self, x, y, body_color, head_color, screen):
         super().__init__(x, y, body_color, head_color, screen)
-        self.speed = 0.5
+        self.speed = 0.5  # steps per frame, adjusted later
         self.step_counter = 0
-        self.step_interval = 2
-        self.direction = (1.0, 0.0)
+        self.step_interval = 2  # move every N frames
+        self.direction = (1.0, 0.0)  # start moving right
         self.next_direction = None
 
     def snap_to_grid(self, x, y):
@@ -39,14 +39,18 @@ class BackgroundSnake(Snake):
         return round(x / g) * g, round(y / g) * g
 
     def update(self, direction=None, accelerate=False, settings=None):
+        # If direction provided, set next_direction (but we ignore external input)
         if direction is not None:
             self.next_direction = direction
 
+        # Only move when on a grid point
         head_x, head_y = self.points[-1]
         if head_x % GRID_SIZE != 0 or head_y % GRID_SIZE != 0:
+            # Not on grid – just move towards grid point
             self._move_towards_grid()
             return
 
+        # We are on a grid point – decide next move
         candidates = self._get_cardinal_directions()
         candidates = [d for d in candidates if not self._is_opposite(d, self.direction)]
         target = self._find_nearest_food()
@@ -59,10 +63,13 @@ class BackgroundSnake(Snake):
                 self._move_one_step()
                 return
 
+        # If all candidates cause collision, try to continue straight
         new_head = (head_x + self.direction[0] * GRID_SIZE, head_y + self.direction[1] * GRID_SIZE)
         if not self._would_collide(new_head):
             self._move_one_step()
             return
+
+        # Even straight is blocked – stay put (do nothing)
         pass
 
     def _move_towards_grid(self):

@@ -1,10 +1,48 @@
 {
-  "customization": {
-    "skin_index": 0,
-    "arena_index": 2
-  },
+  "player_name": "Player",
+  "high_score": 12,
+  "food_consumed": 87,
+  "games_played": 9448,
+  "deaths": 9448,
   "settings": {
-    "turn_sensitivity": 0.07,
-    "acceleration_rate": 0.13999999999999999
+    "turn_sensitivity": 0.18,
+    "acceleration_rate": 0.18
+  },
+  "customization": {
+    "skin_index": 2,
+    "arena_index": 0
+  },
+  "xp": 560,
+  "level": 2,
+  "pvp_wins": 18,
+  "achievements": {
+    "survivor": {
+      "unlocked": true,
+      "xp_reward": 50
+    },
+    "persistence": {
+      "unlocked": true,
+      "xp_reward": 150
+    },
+    "first_bite": {
+      "unlocked": true,
+      "xp_reward": 10
+    },
+    "score_novice": {
+      "unlocked": true,
+      "xp_reward": 25
+    },
+    "pvp_victor": {
+      "unlocked": true,
+      "xp_reward": 75
+    },
+    "pvp_champion": {
+      "unlocked": true,
+      "xp_reward": 200
+    },
+    "food_collector": {
+      "unlocked": true,
+      "xp_reward": 50
+    }
   }
 }

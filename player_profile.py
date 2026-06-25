@@ -50,6 +50,7 @@ def save_profile_data(profile_data):
         pass
 
 def draw_progress_bar(screen, x, y, width, height, progress, color=(100, 200, 100), bg_color=(40, 40, 60)):
+    """Draw a horizontal progress bar with rounded corners."""
     # Background
     pygame.draw.rect(screen, bg_color, (x, y, width, height), border_radius=height//2)
     # Fill
@@ -104,16 +105,18 @@ def show_profile(screen, clock, font, big_font, profile_data):
         panel_x = (screen_width - panel_width) // 2
         draw_transparent_panel(screen, panel_x, panel_top, panel_width, panel_height, radius=20)
 
+        # ---- Content ----
         content_x = panel_x + int(panel_width * 0.06)
         content_width = panel_width - int(panel_width * 0.12)
         y = panel_top + int(panel_height * 0.06)
 
+        # Player name (big)
         player_name = profile_data.get('player_name', 'Player')
         name_surf = name_font.render(player_name, True, (255, 255, 255))
         screen.blit(name_surf, (content_x + (content_width - name_surf.get_width()) // 2, y))
         y += name_surf.get_height() + int(panel_height * 0.04)
 
-        # Left column: general stats
+        # --- Left column: general stats ---
         left_col_x = content_x
         right_col_x = content_x + content_width // 2 + int(panel_width * 0.02)
         col_width = content_width // 2 - int(panel_width * 0.02)
@@ -150,10 +153,10 @@ def show_profile(screen, clock, font, big_font, profile_data):
         for label, val in combat_stats:
             y_right = draw_stat(label, val, right_col_x, y_right, value_color=(255, 215, 0) if "Achievements" in label else TEXT_COLOR)
 
-        # XP bar showing simple leveling system
+        # XP bar
         xp = profile_data.get('xp', 0)
         level = profile_data.get('level', 1)
-        xp_needed = level * 500
+        xp_needed = level * 500  # simple level system
         progress = min(1.0, xp / xp_needed) if xp_needed > 0 else 0
 
         bar_label = label_font.render("XP Progress", True, LABEL_COLOR)
@@ -164,11 +167,12 @@ def show_profile(screen, clock, font, big_font, profile_data):
         bar_width = col_width - 20
         bar_height = int(panel_height * 0.035)
         draw_progress_bar(screen, bar_x, bar_y, bar_width, bar_height, progress, color=(100, 200, 255))
-
+        # XP text
         xp_text = f"{xp} / {xp_needed} XP (Level {level})"
         xp_surf = label_font.render(xp_text, True, (200, 200, 220))
         screen.blit(xp_surf, (bar_x + (bar_width - xp_surf.get_width()) // 2, bar_y + bar_height + 4))
 
+        # Back button
         pygame.draw.rect(screen, (70, 130, 180), back_rect, border_radius=20)
         back_label = button_font.render("Back", True, (255, 255, 255))
         screen.blit(back_label, back_label.get_rect(center=back_rect.center))
