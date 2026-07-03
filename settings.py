@@ -6,7 +6,6 @@ from ui_helpers import draw_transparent_panel
 
 DEFAULT_SETTINGS = {
     "turn_sensitivity": 0.08,
-    "acceleration_rate": 0.08   # kept in data for compatibility, just not shown
 }
 TITLE_COLOR = (20, 30, 60)
 

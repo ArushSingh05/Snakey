@@ -323,7 +323,7 @@ def run_match(screen, clock, font, big_font, profile_data, mode, time_limit_ms=N
                     winner = "Player 1"
                     register_collision_outcome(profile_data, player_won=True)
 
-        # Stats & save on game-over
+        # Stats & save on game-over.
         if game_over and game_over is not True.__class__:
             pass
         if game_over is True:

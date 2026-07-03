@@ -1,20 +1,19 @@
 {
   "player_name": "Arush679",
-  "high_score": 1,
-  "food_consumed": 2,
-  "games_played": 6,
-  "deaths": 3,
+  "high_score": 0,
+  "food_consumed": 0,
+  "games_played": 0,
+  "deaths": 0,
   "settings": {
-    "turn_sensitivity": 0.02,
-    "acceleration_rate": 0.08
+    "turn_sensitivity": 0.02
   },
   "customization": {
     "skin_index": 2,
     "arena_index": 2
   },
-  "xp": 829,
-  "level": 2,
-  "pvp_wins": 12,
+  "xp": 0,
+  "level": 0,
+  "pvp_wins": 0,
   "achievements": {
     "survivor": {
       "unlocked": true,
@@ -45,5 +44,5 @@
       "xp_reward": 50
     }
   },
-  "kills": 5
+  "kills": 0
 }

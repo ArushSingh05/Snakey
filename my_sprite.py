@@ -428,7 +428,7 @@ class EnemyAI(Snake):
 
         scored.sort(key=lambda x: -x[0])
 
-        # Best safe direction
+        # Best safe directions
         if scored and scored[0][0] > -9000:
             return scored[0][1]
 

@@ -1,5 +1,5 @@
 """
-Achievements system for tracking player milestones.
+Achievements system for tracking player milestones
 Includes achievement definitions, unlock conditions, and XP rewards.
 """
 
