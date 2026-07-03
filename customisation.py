@@ -143,6 +143,10 @@ def show_customisation(screen, clock, font, big_font, profile_data):
         pygame.draw.circle(screen, skin["body"], (preview_x, preview_y), preview_radius)
         pygame.draw.circle(screen, skin["head"], (preview_x, preview_y - int(preview_radius * 0.5)), max(15, int(preview_radius * 0.5)))
 
+        hint = button_font.render("Use UP/DOWN to switch, LEFT/RIGHT to change", True, (210, 225, 255))
+        hint_x = panel_x + (panel_width - hint.get_width()) // 2
+        screen.blit(hint, (hint_x, panel_top + int(panel_height * 0.86)))
+
         pygame.draw.rect(screen, (70, 130, 180), back_rect, border_radius=20)
         back_label = button_font.render("Back", True, (255, 255, 255))
         screen.blit(back_label, back_label.get_rect(center=back_rect.center))

@@ -7,6 +7,23 @@ import json
 import os
 
 
+def validate_nickname(value):
+    """Validate a nickname against the game's naming rules."""
+    if not isinstance(value, str):
+        return False, "Nickname must be text."
+
+    cleaned = value.strip()
+    if not cleaned:
+        return False, "Nickname cannot be empty."
+    if len(cleaned) > 20:
+        return False, "Nickname must be 20 characters or less."
+    if not all(char.isalnum() for char in cleaned):
+        return False, "Use only letters and numbers. No spaces or special characters."
+    if not any(char.isalpha() for char in cleaned):
+        return False, "Add at least one letter. Numbers only are not allowed."
+    return True, "Nickname looks good."
+
+
 def validate_profile_data(data):
     """
     Validate profile data structure and types.
@@ -28,6 +45,7 @@ def validate_profile_data(data):
         "food_consumed": 0,
         "games_played": 0,
         "deaths": 0,
+        "kills": 0,
         "xp": 0,
         "level": 1,
         "pvp_wins": 0
@@ -46,7 +64,16 @@ def validate_profile_data(data):
     string_fields = {"player_name": "Player"}
     for field, default in string_fields.items():
         value = data.get(field, default)
-        if not isinstance(value, str) or len(value) > 50:
+        if not isinstance(value, str):
+            print(f"WARNING: Invalid value for {field}: {value}. Using default: {default}")
+            data[field] = default
+            continue
+
+        valid, message = validate_nickname(value)
+        if not valid:
+            print(f"WARNING: Invalid value for {field}: {value}. {message} Using default: {default}")
+            data[field] = default
+        elif len(value) > 50:
             print(f"WARNING: Invalid value for {field}: {value}. Using default: {default}")
             data[field] = default
     
@@ -130,6 +157,7 @@ def get_default_profile():
         "food_consumed": 0,
         "games_played": 0,
         "deaths": 0,
+        "kills": 0,
         "xp": 0,
         "level": 1,
         "pvp_wins": 0,

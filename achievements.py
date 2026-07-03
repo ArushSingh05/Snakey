@@ -8,70 +8,70 @@ ACHIEVEMENTS = {
     "first_bite": {
         "name": "First Bite",
         "description": "Eat your first food",
-        "icon": "🐍",
+        "icon": "S",
         "xp_reward": 10,
         "condition": "food_consumed >= 1"
     },
     "food_collector": {
         "name": "Food Collector",
         "description": "Eat 50 pieces of food",
-        "icon": "🍽️",
+        "icon": "F",
         "xp_reward": 50,
         "condition": "food_consumed >= 50"
     },
     "food_hoarder": {
         "name": "Food Hoarder",
         "description": "Eat 200 pieces of food",
-        "icon": "🏆",
+        "icon": "T",
         "xp_reward": 150,
         "condition": "food_consumed >= 200"
     },
     "score_novice": {
         "name": "Score Novice",
         "description": "Achieve a score of 10",
-        "icon": "⭐",
+        "icon": "*",
         "xp_reward": 25,
         "condition": "high_score >= 10"
     },
     "score_adept": {
         "name": "Score Adept",
         "description": "Achieve a score of 50",
-        "icon": "✨",
+        "icon": "**",
         "xp_reward": 100,
         "condition": "high_score >= 50"
     },
     "score_master": {
         "name": "Score Master",
         "description": "Achieve a score of 100",
-        "icon": "👑",
+        "icon": "C",
         "xp_reward": 250,
         "condition": "high_score >= 100"
     },
     "survivor": {
         "name": "Survivor",
         "description": "Complete 10 games",
-        "icon": "💪",
+        "icon": "M",
         "xp_reward": 50,
         "condition": "games_played >= 10"
     },
     "persistence": {
         "name": "Persistence",
         "description": "Complete 50 games",
-        "icon": "🔥",
+        "icon": "!",
         "xp_reward": 150,
         "condition": "games_played >= 50"
     },
     "pvp_victor": {
         "name": "PvP Victor",
         "description": "Win a PvP match",
-        "icon": "⚔️",
+        "icon": "V",
         "xp_reward": 75,
         "condition": "pvp_wins >= 1"
     },
     "pvp_champion": {
         "name": "PvP Champion",
         "description": "Win 10 PvP matches",
-        "icon": "🥇",
+        "icon": "G",
         "xp_reward": 200,
         "condition": "pvp_wins >= 10"
     }

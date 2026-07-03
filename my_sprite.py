@@ -6,6 +6,7 @@ from imagelist import ImageList
 
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
+GRID_SIZE = 20
 
 
 class MySprite(pygame.sprite.Sprite):
@@ -34,15 +35,13 @@ class MySprite(pygame.sprite.Sprite):
         return self._x
 
     def set_x(self, x):
-        screen_width = self._screen.get_width()
-        self._x = max(0, min(x, screen_width))
+        self._x = max(0, min(x, self._screen.get_width()))
 
     def get_y(self):
         return self._y
 
     def set_y(self, y):
-        screen_height = self._screen.get_height()
-        self._y = max(0, min(y, screen_height))
+        self._y = max(0, min(y, self._screen.get_height()))
 
     x = property(get_x, set_x)
     y = property(get_y, set_y)
@@ -113,20 +112,19 @@ class Enemy(MySprite):
         self.animate()
 
 
-#Snake & Food (from play.py)
 BASE_HEAD_RADIUS = 11
 BASE_BODY_RADIUS = 9
 BASE_FOOD_RADIUS = 8
 FOOD_COLOR = (250, 190, 45)
 
+
 def clamp(value, minimum, maximum):
     return max(minimum, min(value, maximum))
 
+
 def get_scale_factor(screen):
-    screen_width = screen.get_width()
-    screen_height = screen.get_height()
-    width_scale = screen_width / SCREEN_WIDTH
-    height_scale = screen_height / SCREEN_HEIGHT
+    width_scale = screen.get_width() / SCREEN_WIDTH
+    height_scale = screen.get_height() / SCREEN_HEIGHT
     return min(width_scale, height_scale)
 
 
@@ -147,38 +145,30 @@ class Snake:
 
     @property
     def head_radius(self):
-        scale = get_scale_factor(self.screen)
-        return max(5, int(self.base_head_radius * scale))
+        return max(5, int(self.base_head_radius * get_scale_factor(self.screen)))
 
     @property
     def body_radius(self):
-        scale = get_scale_factor(self.screen)
-        return max(4, int(self.base_body_radius * scale))
+        return max(4, int(self.base_body_radius * get_scale_factor(self.screen)))
 
     def wrap(self, x, y):
-        screen_width = self.screen.get_width()
-        screen_height = self.screen.get_height()
-        if x < 0:
-            x += screen_width
-        elif x > screen_width:
-            x -= screen_width
-        if y < 0:
-            y += screen_height
-        elif y > screen_height:
-            y -= screen_height
+        w = self.screen.get_width()
+        h = self.screen.get_height()
+        if x < 0: x += w
+        elif x > w: x -= w
+        if y < 0: y += h
+        elif y > h: y -= h
         return x, y
 
     def update(self, direction, accelerate, settings):
         self.direction = direction or self.direction
-        accel_rate = settings.get("acceleration_rate", 0.08)
-        self.speed += accel_rate if accelerate else -0.05
+        # Fixed moderate speed – acceleration setting removed
+        self.speed += -0.05 if not accelerate else 0.0
         self.speed = clamp(self.speed, self.min_speed, self.max_speed)
-        scale = get_scale_factor(self.screen)
-        scaled_speed = self.speed * scale
+        scaled_speed = self.speed * get_scale_factor(self.screen)
         head_x, head_y = self.points[-1]
-        dx = self.direction[0] * scaled_speed
-        dy = self.direction[1] * scaled_speed
-        new_head = self.wrap(head_x + dx, head_y + dy)
+        new_head = self.wrap(head_x + self.direction[0] * scaled_speed,
+                             head_y + self.direction[1] * scaled_speed)
         self.points.append(new_head)
         if len(self.points) > self.target_length:
             self.points.pop(0)
@@ -200,9 +190,7 @@ class Snake:
 
     def check_self_collision(self):
         head_x, head_y = self.head_position()
-        head_radius = self.head_radius
-        body_radius = self.body_radius
-        collision_dist = (head_radius + body_radius) ** 2
+        collision_dist = (self.head_radius + self.body_radius) ** 2
         for point in self.points[20:-20]:
             px, py = point
             if (head_x - px) ** 2 + (head_y - py) ** 2 < collision_dist:
@@ -211,19 +199,12 @@ class Snake:
 
     def check_food_collision(self, item):
         head_x, head_y = self.head_position()
-        head_radius = self.head_radius
-        item_radius = item.radius
-        if hasattr(item, 'pos'):
-            fx, fy = item.pos
-        else:
-            fx, fy = item.x, item.y
-        return (head_x - fx) ** 2 + (head_y - fy) ** 2 < (head_radius + item_radius) ** 2
+        fx, fy = item.pos if hasattr(item, 'pos') else (item.x, item.y)
+        return (head_x - fx) ** 2 + (head_y - fy) ** 2 < (self.head_radius + item.radius) ** 2
 
     def check_collision_with_segments(self, segments):
         head_x, head_y = self.head_position()
-        head_radius = self.head_radius
-        body_radius = self.body_radius
-        collision_dist = (head_radius + body_radius - 2) ** 2
+        collision_dist = (self.head_radius + self.body_radius - 2) ** 2
         for point in segments:
             px, py = point
             if (head_x - px) ** 2 + (head_y - py) ** 2 < collision_dist:
@@ -239,125 +220,275 @@ class Food:
 
     @property
     def radius(self):
-        scale = get_scale_factor(self.screen)
-        return max(4, int(self.base_radius * scale))
+        return max(4, int(self.base_radius * get_scale_factor(self.screen)))
 
     def respawn(self):
-        screen_width = self.screen.get_width()
-        screen_height = self.screen.get_height()
+        w = self.screen.get_width()
+        h = self.screen.get_height()
         self.pos = (
-            random.randint(self.radius + 20, screen_width - self.radius - 20),
-            random.randint(self.radius + 20, screen_height - self.radius - 20),
+            random.randint(self.radius + 20, w - self.radius - 20),
+            random.randint(self.radius + 20, h - self.radius - 20),
         )
 
     def draw(self, screen):
         pygame.draw.circle(screen, FOOD_COLOR, (int(self.pos[0]), int(self.pos[1])), self.radius)
 
 
-#Enemy AI Snake
+# ─────────────────────────────────────────────────────────────────────────────
+#  AGGRESSIVE ENEMY AI  –  reactive, goal-driven, slither.io-style
+# ─────────────────────────────────────────────────────────────────────────────
+
+CARDINALS = [(1.0, 0.0), (-1.0, 0.0), (0.0, 1.0), (0.0, -1.0)]
+LOOKAHEAD_STEPS = 8   # how many frames ahead to simulate per direction
+
 
 class EnemyAI(Snake):
     """
-    Aggressive AI that chases the player with fast direction updates.
-    Speed is set slightly higher than the player.
+    Every frame the AI:
+      1. Scores every possible goal (food, powerups, player intercept, encircle)
+         and picks the highest-value one.
+      2. Scores all 4 cardinal directions against that goal using lookahead
+         that penalises its own body but NOT the player body when hunting.
+      3. Picks the safest direction that makes progress toward the goal.
+
+    Danger avoidance is separate from goal selection: the AI always avoids its
+    own body regardless of mode, but only avoids the player's body when it is
+    in FOOD/GROW mode (small / far away). When hunting it charges through.
     """
+
+    MODE_GROW  = "grow"   # eat food/powerups to get bigger
+    MODE_HUNT  = "hunt"   # intercept / cut off the player
+    MODE_TRAP  = "trap"   # circle ahead of the player to create a wall
+
     def __init__(self, x, y, screen, target_snake, settings=None):
-        body_color = (200, 50, 50)
-        head_color = (255, 120, 120)
-        super().__init__(x, y, body_color, head_color, screen)
-        self.target = target_snake
-        self.settings = settings or {}
-        self.speed = 4.5
-        self.max_speed = 7.0
+        super().__init__(x, y, (200, 50, 50), (255, 120, 120), screen)
+        self.target    = target_snake
+        self.settings  = settings or {}
+        self.speed     = 4.8
+        self.max_speed = 7.5
         self.min_speed = 3.5
-        self.direction_change_timer = 0
-        self.direction_change_interval = 3
+        self._foods    = []   # set from play.py
+        self.powerups  = []   # set from play.py
+
+        self._mode         = self.MODE_GROW
+        self._frame        = 0
+        self._circle_side  = 1   # flips to alternate trap side
+        self._trap_flipped = 0   # frame when last flipped
+
+    # ── main update (called every frame) ────────────────────────────────────
+
+    # Pixels the AI must travel before being allowed to make a 90° turn.
+    # Smaller = tighter/faster turns (player feel is ~12-16 px).
+    _TURN_INTERVAL   = 14
+    _dist_since_turn = 0.0
 
     def update(self, direction=None, accelerate=False, settings=None):
-        if self.target is None or self.target.dead:
-            self._wander()
-            super().update(self.direction, False, settings or self.settings)
-            return
+        self._frame += 1
+        self._mode = self._choose_mode()
 
-        # Choose a new direction
-        self.direction_change_timer -= 1
-        if self.direction_change_timer <= 0:
-            self._choose_direction()
-            self.direction_change_timer = self.direction_change_interval
+        scale = get_scale_factor(self.screen)
+        self._dist_since_turn += self.speed * scale
 
-        # Update movement with the chosen direction
+        # Only commit a new direction once we've travelled _TURN_INTERVAL px
+        if self._dist_since_turn >= self._TURN_INTERVAL:
+            new_dir = self._decide_direction()
+            if new_dir and new_dir != self.direction:
+                is_reverse = (new_dir[0] == -self.direction[0] and
+                              new_dir[1] == -self.direction[1])
+                if not is_reverse:
+                    self.direction = new_dir
+                    self._dist_since_turn = 0.0
+
+        # Pass current (cardinal) direction into base Snake.update
         super().update(self.direction, False, settings or self.settings)
 
-    def _choose_direction(self):
-        """Pick the best direction to intercept the player."""
-        head = self.head_position()
-        target_head = self.target.head_position()
-        target_dir = self.target.direction
+    # ── mode selection ───────────────────────────────────────────────────────
 
-        # Predict the player's position a few steps ahead
-        predict_steps = 8
-        predict_x = target_head[0] + target_dir[0] * predict_steps * 4
-        predict_y = target_head[1] + target_dir[1] * predict_steps * 4
-        # Clamp to screen bounds
-        screen_w = self.screen.get_width()
-        screen_h = self.screen.get_height()
-        predict_x = max(0, min(predict_x, screen_w))
-        predict_y = max(0, min(predict_y, screen_h))
+    def _choose_mode(self):
+        if self.target is None or self.target.dead:
+            return self.MODE_GROW
 
-        # Direction towards the predicted position
-        dx = predict_x - head[0]
-        dy = predict_y - head[1]
+        my_head = self.head_position()
+        ph      = self.target.head_position()
+        dist    = math.hypot(ph[0] - my_head[0], ph[1] - my_head[1])
+        ai_len  = len(self.points)
+        pl_len  = len(self.target.points)
 
-        # If the player is very close, just go straight
-        if abs(dx) < 10 and abs(dy) < 10:
-            return
+        # Grow priority: always grab powerups or food if very close (<120 px),
+        # regardless of mode, by boosting their score in _pick_goal.
+        # Mode just determines the secondary objective.
 
-        # Choose the dominant axis for 4-direction movement
-        if abs(dx) > abs(dy):
-            new_dir = (1.0, 0.0) if dx > 0 else (-1.0, 0.0)
+        if dist < 280 and ai_len >= pl_len * 0.7:
+            return self.MODE_TRAP   # close + big enough → try to wall them in
+        elif dist < 450:
+            return self.MODE_HUNT   # medium range → intercept
         else:
-            new_dir = (0.0, 1.0) if dy > 0 else (0.0, -1.0)
+            return self.MODE_GROW   # far away → eat and grow
 
-        # Prevent reversing direction
-        if self.direction[0] == -new_dir[0] and self.direction[1] == -new_dir[1]:
-            new_dir = self.direction
+    # ── goal picking ─────────────────────────────────────────────────────────
 
-        # Test if this direction leads to self-collision
-        head_x, head_y = self.points[-1]
-        test_x = head_x + new_dir[0] * 5
-        test_y = head_y + new_dir[1] * 5
-        collides = False
-        for point in self.points[:-1]:  # skip tail
-            if (point[0] - test_x) ** 2 + (point[1] - test_y) ** 2 < (self.body_radius * 2) ** 2:
-                collides = True
-                break
+    def _pick_goal(self):
+        """
+        Return the single best (x, y) target point this frame.
+        Scores: nearby powerup > nearby food > hunt intercept / trap point.
+        """
+        my_head = self.head_position()
+        w = self.screen.get_width()
+        h = self.screen.get_height()
 
-        if not collides:
-            self.direction = new_dir
-            return
+        best_score = -1e9
+        best_pos   = (w // 2, h // 2)
 
-        # If blocked, try other directions in order of preference
-        # Preferred directions: straight, left, right
-        dirs = [(1,0), (-1,0), (0,1), (0,-1)]
-        dirs = [d for d in dirs if not (d[0] == -self.direction[0] and d[1] == -self.direction[1])]
-        dirs = [d for d in dirs if not (d[0] == self.direction[0] and d[1] == self.direction[1])]
-        random.shuffle(dirs)
+        # ── Food ────────────────────────────────────────────────────────────
+        for food in self._foods:
+            d = math.hypot(food.pos[0] - my_head[0], food.pos[1] - my_head[1])
+            # Value decays with distance; always worth chasing
+            score = 800 - d * 0.8
+            if score > best_score:
+                best_score = score
+                best_pos   = food.pos
 
-        for d in dirs:
-            test_x = head_x + d[0] * 5
-            test_y = head_y + d[1] * 5
-            blocked = False
-            for point in self.points[:-1]:
-                if (point[0] - test_x) ** 2 + (point[1] - test_y) ** 2 < (self.body_radius * 2) ** 2:
-                    blocked = True
+        # ── Powerups (high value – worth detour) ────────────────────────────
+        for pu in self.powerups:
+            if not getattr(pu, 'active', False) or getattr(pu, 'collected', True):
+                continue
+            d = math.hypot(pu.x - my_head[0], pu.y - my_head[1])
+            score = 1200 - d * 0.8   # powerups score higher than food
+            if score > best_score:
+                best_score = score
+                best_pos   = (pu.x, pu.y)
+
+        # ── Player-based goals (hunt / trap) – only compete if no item is very close
+        if self.target and not self.target.dead:
+            ph = self.target.head_position()
+            d_player = math.hypot(ph[0] - my_head[0], ph[1] - my_head[1])
+
+            if self._mode == self.MODE_HUNT:
+                # Intercept: predict player position N frames ahead
+                intercept = self._intercept_point(frames_ahead=18)
+                # Score: valuable when close, very valuable when we're bigger
+                size_bonus = 300 if len(self.points) >= len(self.target.points) * 0.9 else 0
+                score = 600 + size_bonus - d_player * 0.3
+                if score > best_score:
+                    best_score = score
+                    best_pos   = intercept
+
+            elif self._mode == self.MODE_TRAP:
+                # Trap: aim ahead-and-to-the-side of player to build a wall
+                trap = self._trap_point()
+                score = 900 - d_player * 0.2   # trapping is top priority when close
+                if score > best_score:
+                    best_score = score
+                    best_pos   = trap
+
+        return best_pos
+
+    # ── goal helpers ────────────────────────────────────────────────────────
+
+    def _intercept_point(self, frames_ahead=18):
+        px, py   = self.target.head_position()
+        pdx, pdy = self.target.direction
+        spd      = self.target.speed * get_scale_factor(self.screen)
+        pred_x   = (px + pdx * spd * frames_ahead) % self.screen.get_width()
+        pred_y   = (py + pdy * spd * frames_ahead) % self.screen.get_height()
+        return (pred_x, pred_y)
+
+    def _trap_point(self):
+        """
+        Aim for a point perpendicular to the player's direction of travel,
+        ahead of them, to place our body as a wall.
+        """
+        px, py   = self.target.head_position()
+        pdx, pdy = self.target.direction
+        # Flip which side we circle every ~2.5 s to tighten the spiral
+        if self._frame - self._trap_flipped > 150:
+            self._circle_side  *= -1
+            self._trap_flipped  = self._frame
+        perp_x = -pdy * self._circle_side
+        perp_y =  pdx * self._circle_side
+        goal_x = px + pdx * 100 + perp_x * 130
+        goal_y = py + pdy * 100 + perp_y * 130
+        goal_x = clamp(goal_x, 30, self.screen.get_width()  - 30)
+        goal_y = clamp(goal_y, 30, self.screen.get_height() - 30)
+        return (goal_x, goal_y)
+
+    # ── direction decision ───────────────────────────────────────────────────
+
+    def _decide_direction(self):
+        goal    = self._pick_goal()
+        reverse = (-self.direction[0], -self.direction[1])
+
+        # Score all 4 directions; exclude reverse unless totally stuck
+        scored = []
+        for d in CARDINALS:
+            if d == reverse:
+                continue
+            s = self._score_direction(d, goal)
+            scored.append((s, d))
+
+        scored.sort(key=lambda x: -x[0])
+
+        # Best safe direction
+        if scored and scored[0][0] > -9000:
+            return scored[0][1]
+
+        # All forward directions are bad – try reverse as last resort
+        s = self._score_direction(reverse, goal)
+        if s > -9000:
+            return reverse
+
+        return None  # keep current direction
+
+    # ── direction scoring (lookahead) ───────────────────────────────────────
+
+    def _score_direction(self, d, goal):
+        """
+        Simulate LOOKAHEAD_STEPS frames in direction d.
+        Penalties:
+          - hitting own body  → large penalty, stop counting
+          - hitting player body → penalty ONLY in GROW mode (self-preservation)
+            In HUNT/TRAP mode we ignore player body (we WANT to be near them)
+        Reward:
+          - proximity of simulated final position to goal
+          - number of safe steps (open space)
+        """
+        hx, hy = self.head_position()
+        w      = self.screen.get_width()
+        h      = self.screen.get_height()
+        step   = max(6.0, self.speed * get_scale_factor(self.screen))
+
+        avoid_player_body = (self._mode == self.MODE_GROW)
+        safe_steps = 0
+
+        for i in range(1, LOOKAHEAD_STEPS + 1):
+            nx = (hx + d[0] * step * i) % w
+            ny = (hy + d[1] * step * i) % h
+
+            # Own body – always avoid (skip last 4 pts which will have moved)
+            hit_self = False
+            for pt in self.points[:-4]:
+                if (pt[0] - nx) ** 2 + (pt[1] - ny) ** 2 < (self.body_radius * 1.6) ** 2:
+                    hit_self = True
                     break
-            if not blocked:
-                self.direction = d
-                return
+            if hit_self:
+                return safe_steps * 12 - 800
 
-    def _wander(self):
-        """Random wandering when no target."""
-        if random.random() < 0.05:
-            dirs = [(1,0), (-1,0), (0,1), (0,-1)]
-            dirs = [d for d in dirs if not (d[0] == -self.direction[0] and d[1] == -self.direction[1])]
-            self.direction = random.choice(dirs)
+            # Player body – only dangerous in GROW mode
+            if avoid_player_body and self.target and not self.target.dead:
+                hit_player = False
+                for pt in self.target.points:
+                    if (pt[0] - nx) ** 2 + (pt[1] - ny) ** 2 < (self.body_radius + self.target.body_radius) ** 2:
+                        hit_player = True
+                        break
+                if hit_player:
+                    return safe_steps * 12 - 400
+
+            safe_steps += 1
+
+        # Proximity reward: how close is the simulated final position to the goal?
+        final_x = (hx + d[0] * step * LOOKAHEAD_STEPS) % w
+        final_y = (hy + d[1] * step * LOOKAHEAD_STEPS) % h
+        dist_to_goal = math.hypot(goal[0] - final_x, goal[1] - final_y)
+        proximity = max(0, 700 - dist_to_goal)
+
+        return safe_steps * 12 + proximity
