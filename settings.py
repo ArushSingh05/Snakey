@@ -21,7 +21,7 @@ def ensure_settings(data):
 def show_settings(screen, clock, font, big_font, profile_data):
     settings = ensure_settings(profile_data)
     option_index = 0
-    # Only turn_sensitivity is exposed; acceleration is handled via power-ups
+    # Only turn_sensitivity is exposed; acceleration is handled via power-up
     options = ["turn_sensitivity"]
     value_labels = {
         "turn_sensitivity": "Turn sensitivity",

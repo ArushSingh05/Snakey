@@ -2,7 +2,7 @@ import pygame
 from os.path import exists
 
 class ImageList:
-    # Loads numbered image files and scales them for consistent rendering.
+    # Loads numbered image files and scales them for consistent rendering
     def __init__(self, filename, width, height, extension="png"):
         self._images = []
         count = 0

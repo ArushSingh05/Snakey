@@ -1,5 +1,5 @@
 """
-Time-limited game mode where players compete for maximum score in fixed duration
+Time-limited game mode where players compete for maximum score in fixed duration.
 Helps players develop strategy and improve decision-making under pressure.
 """
 

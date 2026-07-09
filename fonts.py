@@ -1,7 +1,7 @@
 import pygame
 import os
 
-# Font management
+# Font management.
 FONT_PATHS = [
     "fonts/Roboto-Regular.ttf",
 ]

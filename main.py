@@ -1,4 +1,4 @@
-# Final
+# Final code
 import math
 import pygame
 import random

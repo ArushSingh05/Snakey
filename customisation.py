@@ -3,7 +3,7 @@ import os
 from fonts import get_font
 from ui_helpers import draw_transparent_panel
 
-# Skin options
+# Skin options.
 SKIN_OPTIONS = [
     {"label": "Emerald", "body": (66, 184, 118), "head": (230, 255, 190)},
     {"label": "Violet", "body": (156, 79, 198), "head": (244, 194, 255)},

@@ -7,7 +7,7 @@ from fonts import get_font
 from customisation import paint_arena
 from ui_helpers import draw_transparent_panel
 
-# Player profile
+# Player profile.
 PROFILE_FILE = "profile_data.json"
 DEFAULT_PROFILE = {
     "player_name": "Player",

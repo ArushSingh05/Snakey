@@ -1,5 +1,5 @@
 """
-Power-ups system
+Power-ups system.
 Two types:
   - speed_boost : player moves faster for 5 seconds
   - growth_burst: snake grows +7 tiles immediately, then shrinks back after 5 seconds

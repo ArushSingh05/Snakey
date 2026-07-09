@@ -77,7 +77,7 @@ def validate_profile_data(data):
             print(f"WARNING: Invalid value for {field}: {value}. Using default: {default}")
             data[field] = default
     
-    # Validate setting
+    # Validate settings
     if "settings" not in data or not isinstance(data["settings"], dict):
         data["settings"] = {}
     
